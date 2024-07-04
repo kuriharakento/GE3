@@ -26,6 +26,10 @@
 #include <dxcapi.h>
 #pragma comment(lib,"dxcompiler.lib")
 
+
+#include "Input.h"
+
+
 //ImGui
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
@@ -1204,6 +1208,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	bool useMonsterBall = true;
 
+	//入力
+	Input* input = nullptr;
+	input = new Input();
+	input->Initialize(wc.hInstance,hwnd);
+
 
 	///===================================================================
 	///
@@ -1482,6 +1491,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	delete input;
 
 	CloseHandle(fenceEvent);
 
