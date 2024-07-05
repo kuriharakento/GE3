@@ -9,19 +9,11 @@ public:	//静的メンバ関数
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 public:	//メンバ関数
-	/// \brief WindowsAPIの初期化
 	void Initialize();
 
-	/// \brief 更新
 	void Update();
 
-	/// \brief 終了
 	void Finalize();
-
-	//メッセージの処理
-	bool ProcessMessage();
-
-
 
 	HWND GetHwnd() const { return hwnd_; }
 

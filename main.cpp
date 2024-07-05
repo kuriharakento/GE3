@@ -1177,262 +1177,264 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 		//Windowにメッセージが来てたら最優先で処理させる
-		if (winApp->ProcessMessage())
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
-			break;
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
-
-		//フレームの先頭でImGuiに、ここからフレームが始まる旨を告げる
-		ImGui_ImplDX12_NewFrame();
-		ImGui_ImplWin32_NewFrame();
-		ImGui::NewFrame();
-
-		///===================================================================
-		///
-		///ゲームの処理		更新処理
-		///
-		///===================================================================
-
-		//入力の更新
-		input->Update();
-
-
-		//===================================================
-		//ImGui
-		//===================================================
-
-		ImGui::Begin("Setting");
-
-		ImGui::Text("camera");
-		ImGui::SliderFloat3("cameraPosition", &cameraTransform.translate.x, -100.0f, 0.0f);
-		ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-
-		//改行
-		ImGui::NewLine();
-
-		if (ImGui::CollapsingHeader("material"))
+		else
 		{
-			ImGui::ColorEdit4("color", &materialData->color.x);
+			//フレームの先頭でImGuiに、ここからフレームが始まる旨を告げる
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+
+			///===================================================================
+			///
+			///ゲームの処理		更新処理
+			///
+			///===================================================================
+
+			//入力の更新
+			input->Update();
+
+
+			//===================================================
+			//ImGui
+			//===================================================
+
+			ImGui::Begin("Setting");
+
+			ImGui::Text("camera");
+			ImGui::SliderFloat3("cameraPosition", &cameraTransform.translate.x, -100.0f, 0.0f);
+			ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+
+			//改行
+			ImGui::NewLine();
+
+			if (ImGui::CollapsingHeader("material"))
+			{
+				ImGui::ColorEdit4("color", &materialData->color.x);
+			}
+
+			if (ImGui::CollapsingHeader("vertexData"))
+			{
+				ImGui::SliderFloat3("translate", &transform.translate.x, -20.0f, 20.0f);
+				ImGui::SliderAngle("rotationX", &transform.rotate.x);
+				ImGui::SliderAngle("rotationY", &transform.rotate.y);
+				ImGui::SliderAngle("rotationZ", &transform.rotate.z);
+				ImGui::SliderFloat3("scale", &transform.scale.x, 0.0f, 5.0f);
+			}
+			if (ImGui::CollapsingHeader("vertexDataSprite"))
+			{
+				ImGui::SliderFloat3("translate", &transformSprite.translate.x, -20.0f, 20.0f);
+				ImGui::SliderFloat3("scale", &transformSprite.scale.x, 0.0f, 5.0f);
+			}
+			if (ImGui::CollapsingHeader("Lighting"))
+			{
+				ImGui::ColorEdit4("color", &directionalLightData->color.x);
+				ImGui::SliderFloat3("direction", &directionalLightData->direction.x, -1.0f, 1.0f);
+				ImGui::SliderFloat("intensity", &directionalLightData->intensity, 0.0f, 1.0f);
+
+			}
+
+			if (ImGui::CollapsingHeader("UVTransform"))
+			{
+				ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
+				ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+				ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+			}
+
+			ImGui::End();
+
+
+			//ゲームの処理が終わり描画処理に入る前にImGuiの内部コマンドを生成する
+			ImGui::Render();
+
+
+			//===================================================
+			//vertexData
+			//===================================================
+
+			//vertexDataの変換
+			worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+			cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+			viewMatrix = Inverse(cameraMatrix);
+			projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
+			worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+			wvpData->WVP = worldViewProjectionMatrix;
+			wvpData->World = worldMatrix;
+
+
+			//vertexDetaSpriteの変換
+			worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+			viewMatrixSprite = MakeIdentity4x4();
+			projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
+			worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
+			transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
+			transformationMatrixDataSprite->World = worldMatrixSprite;
+
+
+			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
+			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
+			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
+			materialDataSprite->uvTransform = uvTransformMatrix;
+
+			///===================================================================
+			///
+			///ゲームの処理		描画処理
+			///
+			///===================================================================
+
+
+
+
+
+
+
+
+
+			///===================================================================
+			///コマンドを積み込んで確定させる
+			///==================================================================
+
+			//これから書き込むバックバッファのインデックスを取得
+			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+
+
+			//TransitionBarrierの設定
+			D3D12_RESOURCE_BARRIER barrier{};
+			//今回のバリアはTransition
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			//Noneにしておく
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			//バリアを張る対称のリソース。現在のバックバッファに対して行う
+			barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
+			//遷移前（現在）のresourceState
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+			//遷移後のResourceState
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			//transitionBarrierを張る
+			commandList->ResourceBarrier(1, &barrier);
+
+
+			//描画先のRTVを設定する
+			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
+
+			//指定した色で画面全体をクリアする
+			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };	//青っぽい色。RGBAの順
+			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+
+			//指定した深度で画面全体をクリアする
+			commandList->ClearDepthStencilView(
+				dsvHandle,
+				D3D12_CLEAR_FLAG_DEPTH,
+				1.0f,
+				0,
+				0,
+				nullptr
+			);
+
+			//描画用のDescriptorHeapの設定
+			//もろもろの描画処理が終わったタイミングでImGuiの描画コマンドを積む
+			//Guiは画面の最前面に映すので、一番最後の描画として行う
+			Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap };
+			commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());
+
+			///===================================================================
+			///いざ描画
+			///===================================================================
+
+			commandList->RSSetViewports(1, &viewport);
+			commandList->RSSetScissorRects(1, &scissorRect);
+			//RootSignatureを設定。PSOに設定しているけど別途設定が必要
+			commandList->SetGraphicsRootSignature(rootSignature.Get());
+			commandList->SetPipelineState(graphicsPipelineState.Get());
+
+
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばよい
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//マテリアルCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+			//wvp用のCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+			//SRVのDescriptorTableの先頭を設定。2はrootPatameter[2]である。
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
+			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+			//描画！
+			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+
+
+			//Spriteの描画。変更が必要なものだけ変更する
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+			//IBVを設定
+			commandList->IASetIndexBuffer(&indexBufferViewSprite);
+			//CBuffer
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
+
+			//TransformationMatrixCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			//SRVのDescriptorTableの先頭を設定。2はrootPatameter[2]である。
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
+			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
+
+			//スプライトの描画(DrawCall//ドローコール)
+			//commandList->DrawIndexedInstanced(6, 1, 0, 0,0);
+
+
+			//実際のcommandListのImGuiの描画コマンドを積む
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
+
+			//画面の各処理はすべて終わり、画面に移すので、状態を遷移
+			//今回はRenderTargetからPresentにする
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+			//TransitonのBarrierを張る
+			commandList->ResourceBarrier(1, &barrier);
+
+
+			//コマンドリストの内容を確定させる。すべてのコマンドを頼んでからCloseすること
+			hr = commandList->Close();
+			assert(SUCCEEDED(hr));
+
+
+			///===================================================================
+			///コマンドをキックする
+			///===================================================================
+
+			//GPU二コマンドリストの実行を行わせる
+			Microsoft::WRL::ComPtr<ID3D12CommandList> commandLists[] = { commandList };
+			commandQueue->ExecuteCommandLists(1, commandLists->GetAddressOf());
+			//GPUとOSに画面の交換を行うように通知する
+			swapChain->Present(1, 0);
+
+
+			//Fenceの値を更新
+			fenceValue++;
+			//GPUがここまでたどり着いたときに、Fenceの値を指定した値を代入するようにSignalを送る
+			commandQueue->Signal(fence.Get(), fenceValue);
+			//Fenceの値が指定したSignal値にたどり着いているか確認する
+			//GetCompleteValueの初期値はFence制作時に渡した初期値
+			if (fence->GetCompletedValue() < fenceValue)
+			{
+				//指定したSignalにたどり着いていないので、たどり着くまで待つようにイベントを設定する
+				fence->SetEventOnCompletion(fenceValue, fenceEvent);
+				//イベントを待つ
+				WaitForSingleObject(fenceEvent, INFINITE);
+			}
+
+
+			//次フレーム用のコマンドリストを準備
+			hr = commandAllocator->Reset();
+			assert(SUCCEEDED(hr));
+			hr = commandList->Reset(commandAllocator.Get(), nullptr);
+			assert(SUCCEEDED(hr));
+
 		}
-
-		if (ImGui::CollapsingHeader("vertexData"))
-		{
-			ImGui::SliderFloat3("translate", &transform.translate.x, -20.0f, 20.0f);
-			ImGui::SliderAngle("rotationX", &transform.rotate.x);
-			ImGui::SliderAngle("rotationY", &transform.rotate.y);
-			ImGui::SliderAngle("rotationZ", &transform.rotate.z);
-			ImGui::SliderFloat3("scale", &transform.scale.x, 0.0f, 5.0f);
-		}
-		if (ImGui::CollapsingHeader("vertexDataSprite"))
-		{
-			ImGui::SliderFloat3("translate", &transformSprite.translate.x, -20.0f, 20.0f);
-			ImGui::SliderFloat3("scale", &transformSprite.scale.x, 0.0f, 5.0f);
-		}
-		if (ImGui::CollapsingHeader("Lighting"))
-		{
-			ImGui::ColorEdit4("color", &directionalLightData->color.x);
-			ImGui::SliderFloat3("direction", &directionalLightData->direction.x, -1.0f, 1.0f);
-			ImGui::SliderFloat("intensity", &directionalLightData->intensity, 0.0f, 1.0f);
-
-		}
-
-		if (ImGui::CollapsingHeader("UVTransform"))
-		{
-			ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-			ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-			ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-		}
-
-		ImGui::End();
-
-
-		//ゲームの処理が終わり描画処理に入る前にImGuiの内部コマンドを生成する
-		ImGui::Render();
-
-
-		//===================================================
-		//vertexData
-		//===================================================
-
-		//vertexDataの変換
-		worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-		cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-		viewMatrix = Inverse(cameraMatrix);
-		projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::kClientWidth) / float(WinApp::kClientHeight), 0.1f, 100.0f);
-		worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
-		wvpData->WVP = worldViewProjectionMatrix;
-		wvpData->World = worldMatrix;
-
-
-		//vertexDetaSpriteの変換
-		worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
-		viewMatrixSprite = MakeIdentity4x4();
-		projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
-		worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
-		transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
-		transformationMatrixDataSprite->World = worldMatrixSprite;
-
-
-		Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
-		uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
-		uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
-		materialDataSprite->uvTransform = uvTransformMatrix;
-
-		///===================================================================
-		///
-		///ゲームの処理		描画処理
-		///
-		///===================================================================
-
-
-
-
-
-
-
-
-
-		///===================================================================
-		///コマンドを積み込んで確定させる
-		///==================================================================
-
-		//これから書き込むバックバッファのインデックスを取得
-		UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
-
-
-		//TransitionBarrierの設定
-		D3D12_RESOURCE_BARRIER barrier{};
-		//今回のバリアはTransition
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		//Noneにしておく
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		//バリアを張る対称のリソース。現在のバックバッファに対して行う
-		barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
-		//遷移前（現在）のresourceState
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		//遷移後のResourceState
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		//transitionBarrierを張る
-		commandList->ResourceBarrier(1, &barrier);
-
-
-		//描画先のRTVを設定する
-		commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
-		commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
-
-		//指定した色で画面全体をクリアする
-		float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };	//青っぽい色。RGBAの順
-		commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
-
-		//指定した深度で画面全体をクリアする
-		commandList->ClearDepthStencilView(
-			dsvHandle,
-			D3D12_CLEAR_FLAG_DEPTH,
-			1.0f,
-			0,
-			0,
-			nullptr
-		);
-
-		//描画用のDescriptorHeapの設定
-		//もろもろの描画処理が終わったタイミングでImGuiの描画コマンドを積む
-		//Guiは画面の最前面に映すので、一番最後の描画として行う
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap };
-		commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());
-
-		///===================================================================
-		///いざ描画
-		///===================================================================
-
-		commandList->RSSetViewports(1, &viewport);
-		commandList->RSSetScissorRects(1, &scissorRect);
-		//RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		commandList->SetGraphicsRootSignature(rootSignature.Get());
-		commandList->SetPipelineState(graphicsPipelineState.Get());
-
-
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-		//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけばよい
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		//マテリアルCBufferの場所を設定
-		commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-		//wvp用のCBufferの場所を設定
-		commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-		//SRVのDescriptorTableの先頭を設定。2はrootPatameter[2]である。
-		commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-
-		commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-		//描画！
-		commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
-
-
-		//Spriteの描画。変更が必要なものだけ変更する
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
-		//IBVを設定
-		commandList->IASetIndexBuffer(&indexBufferViewSprite);
-		//CBuffer
-		commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress());
-
-		//TransformationMatrixCBufferの場所を設定
-		commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-		//SRVのDescriptorTableの先頭を設定。2はrootPatameter[2]である。
-		commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-
-		commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-
-		//スプライトの描画(DrawCall//ドローコール)
-		//commandList->DrawIndexedInstanced(6, 1, 0, 0,0);
-
-
-		//実際のcommandListのImGuiの描画コマンドを積む
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
-
-		//画面の各処理はすべて終わり、画面に移すので、状態を遷移
-		//今回はRenderTargetからPresentにする
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-		//TransitonのBarrierを張る
-		commandList->ResourceBarrier(1, &barrier);
-
-
-		//コマンドリストの内容を確定させる。すべてのコマンドを頼んでからCloseすること
-		hr = commandList->Close();
-		assert(SUCCEEDED(hr));
-
-
-		///===================================================================
-		///コマンドをキックする
-		///===================================================================
-
-		//GPU二コマンドリストの実行を行わせる
-		Microsoft::WRL::ComPtr<ID3D12CommandList> commandLists[] = { commandList };
-		commandQueue->ExecuteCommandLists(1, commandLists->GetAddressOf());
-		//GPUとOSに画面の交換を行うように通知する
-		swapChain->Present(1, 0);
-
-
-		//Fenceの値を更新
-		fenceValue++;
-		//GPUがここまでたどり着いたときに、Fenceの値を指定した値を代入するようにSignalを送る
-		commandQueue->Signal(fence.Get(), fenceValue);
-		//Fenceの値が指定したSignal値にたどり着いているか確認する
-		//GetCompleteValueの初期値はFence制作時に渡した初期値
-		if (fence->GetCompletedValue() < fenceValue)
-		{
-			//指定したSignalにたどり着いていないので、たどり着くまで待つようにイベントを設定する
-			fence->SetEventOnCompletion(fenceValue, fenceEvent);
-			//イベントを待つ
-			WaitForSingleObject(fenceEvent, INFINITE);
-		}
-
-
-		//次フレーム用のコマンドリストを準備
-		hr = commandAllocator->Reset();
-		assert(SUCCEEDED(hr));
-		hr = commandList->Reset(commandAllocator.Get(), nullptr);
-		assert(SUCCEEDED(hr));
-
-
 	}
 	//ImGuiの終了処理。
 	ImGui_ImplDX12_Shutdown();
@@ -1446,12 +1448,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	winApp->Finalize();
 	delete winApp;
 
-
+	
 
 #ifdef _DEBUG
 
 #endif
-
+	
 
 
 
