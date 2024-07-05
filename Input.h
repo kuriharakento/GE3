@@ -4,6 +4,8 @@
 #define DIRECTINPUT_VERSION	0x0800	//DirectInputのバージョン指定
 #include  <dinput.h>
 
+#include "WinApp.h"
+
 
 class Input
 {
@@ -13,7 +15,7 @@ public:
 
 public:		//メンバ関数
 	//初期化
-	void Initialize(HINSTANCE hInstance,HWND hwnd);
+	void Initialize(WinApp* winApp);
 
 	//更新
 	void Update();
@@ -38,5 +40,8 @@ private:
 
 	//前回の全キーの状態
 	BYTE keyPre[256] = {};
+
+	//WindowsAPI
+	WinApp* winApp = nullptr;
 };
 

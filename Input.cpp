@@ -9,14 +9,17 @@
 
 
 
-void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
+void Input::Initialize(WinApp* winApp)
 {
 	HRESULT result;
+
+	//借りてきたWinAppのインスタンスを記録
+	this->winApp = winApp;
 
 	//DirectInputのインスタンス生成
 	ComPtr<IDirectInput8> directInput = nullptr;
 	result = DirectInput8Create(
-		hInstance,
+		winApp->GetHInstance(),
 		DIRECTINPUT_VERSION, 
 		IID_IDirectInput8, 
 		(void**)&directInput,
@@ -33,7 +36,7 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd)
 	assert(SUCCEEDED(result));
 
 	//排他制御7レベルのセット
-	result = keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	result = keyboard->SetCooperativeLevel(winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
 
 }

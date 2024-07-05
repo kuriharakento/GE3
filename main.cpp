@@ -1160,7 +1160,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//入力
 	Input* input = nullptr;
 	input = new Input();
-	input->Initialize(winApp->GetHInstance(),winApp->GetHwnd());
+	input->Initialize(winApp);
 
 
 	///===================================================================
@@ -1436,10 +1436,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		}
 	}
-
-	//COMの終了処理
-	CoUninitialize();
-
 	//ImGuiの終了処理。
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
@@ -1447,13 +1443,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	CloseHandle(fenceEvent);
 
+	delete input;
+
+	winApp->Finalize();
+	delete winApp;
+
+	
+
 #ifdef _DEBUG
 
 #endif
-	CloseWindow(winApp->GetHwnd());
+	
 
-	delete input;
-	delete winApp;
+
 
 	Microsoft::WRL::ComPtr<IDXGIDebug1> debug;
 	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug))))

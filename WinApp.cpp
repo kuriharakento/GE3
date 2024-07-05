@@ -30,18 +30,18 @@ void WinApp::Initialize()
 {
 	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 
-	wc.lpfnWndProc = WindowProc;
-	wc.lpszClassName = L"GE3WindowClass";
-	wc.hInstance = GetModuleHandle(nullptr);
-	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc_.lpfnWndProc = WindowProc;
+	wc_.lpszClassName = L"GE3WindowClass";
+	wc_.hInstance = GetModuleHandle(nullptr);
+	wc_.hCursor = LoadCursor(nullptr, IDC_ARROW);
 
-	RegisterClass(&wc);
+	RegisterClass(&wc_);
 
 	RECT wrc = { 0,0,kClientWidth,kClientHeight };
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
-	hwnd = CreateWindow(
-		wc.lpszClassName,
+	hwnd_ = CreateWindow(
+		wc_.lpszClassName,
 		L"GE3",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
@@ -50,16 +50,23 @@ void WinApp::Initialize()
 		wrc.bottom - wrc.top,
 		nullptr,
 		nullptr,
-		wc.hInstance,
+		wc_.hInstance,
 		nullptr
 	);
 	
-	ShowWindow(hwnd,SW_SHOW);
+	ShowWindow(hwnd_,SW_SHOW);
 }
 
 void WinApp::Update()
 {
 	
 
+}
+
+void WinApp::Finalize()
+{
+	CloseWindow(hwnd_);
+	//COMの終了処理
+	CoUninitialize();
 }
 
