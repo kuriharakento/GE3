@@ -1174,8 +1174,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//ウィンドウのxボタンが押されるまでループ
 	while (msg.message != WM_QUIT)
 	{
-
-
 		//Windowにメッセージが来てたら最優先で処理させる
 		if (winApp->ProcessMessage())
 		{
