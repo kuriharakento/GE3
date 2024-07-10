@@ -3,6 +3,8 @@
 #include <dxgi1_6.h>
 #include <wrl.h>
 #include <array>
+#include <chrono>
+
 #include <dxcapi.h>
 #pragma comment(lib,"dxcompiler.lib")
 
@@ -122,6 +124,14 @@ public:	//メンバ関数
 	/// \param filePath 
 	/// \return 
 	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
+
+private:
+	//FPS固定初期化
+	void InitializeFixFPS();
+	//FPS固定更新
+	void UpdateFixFPS();
+	//記録時間(FPS固定用)
+	std::chrono::steady_clock::time_point reference_;
 
 
 private:	//メンバ変数
