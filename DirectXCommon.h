@@ -51,6 +51,12 @@ public:	//メンバ関数
 	/// \brief ImGuiの初期化
 	void InitializeImGui();
 
+	//描画前処理
+	void PreDraw();
+
+	//描画後処理
+	void PostDraw();
+
 	/// \brief ディスクリプタヒープを生成する
 	/// \param device デバイス
 	/// \param heapType 
@@ -158,6 +164,9 @@ private:	//メンバ変数
 	IDxcCompiler3* dxcCompiler_ = nullptr;
 	IDxcIncludeHandler* includeHandler_ = nullptr;
 
+	/*--------------[ 描画後処理の変数 ]-----------------*/
+
+	UINT64 fenceValue_ = 0;
 
 };
 
