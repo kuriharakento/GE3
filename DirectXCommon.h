@@ -8,6 +8,8 @@
 
 #include "Logger.h"
 #include "WinApp.h"
+#include "externals/DirectXTex/d3dx12.h"
+#include "externals/DirectXTex/DirectXTex.h"
 
 class DirectXCommon
 {
@@ -63,21 +65,21 @@ public:	//メンバ関数
 	/// \param numDescriptor 
 	/// \param shaderVisible 
 	/// \return 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12Device> device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptor, bool shaderVisible);
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptor, bool shaderVisible);
 
 	/// \brief CPUのディスクリプタハンドルを取得
 	/// \param descriptorHeap 
 	/// \param descriptorSize 
 	/// \param index 
 	/// \return 
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
+	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	/// \brief GPUのディスクリプタハンドルを取得
 	/// \param descriptorHeap 
 	/// \param descriptorSize 
 	/// \param index 
 	/// \return 
-	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
+	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	/// \brief SRV用の指定のCPUディスクリプタハンドルを取得する
 	/// \param index 
@@ -89,6 +91,39 @@ public:	//メンバ関数
 	/// \return 
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
 
+	/// \brief シェーダーコンパイル関数
+	/// \param filePath 
+	/// \param profile 
+	/// \param dxcUtils 
+	/// \param dxcCompiler 
+	/// \param includeHandler 
+	/// \return 
+	Microsoft::WRL::ComPtr<IDxcBlob> CompileSharder(const std::wstring& filePath, const wchar_t* profile);
+
+	/// \brief リソース生成関数
+	/// \param device 
+	/// \param sizeInBytes 
+	/// \return 
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
+
+	/// \brief テクスチャリソースの生成関数
+	/// \param metadata 
+	/// \return 
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
+
+	/// \brief テクスチャデータの転送
+	/// \param texture 
+	/// \param mipImages 
+	/// \return 
+	[[nodiscard]]
+	Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
+
+	/// \brief テクスチャファイルの読み込み
+	/// \param filePath 
+	/// \return 
+	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
+
+
 private:	//メンバ変数
 
 	WinApp* winApp_ = nullptr;
@@ -99,8 +134,6 @@ private:	//メンバ変数
 	Microsoft::WRL::ComPtr<ID3D12Device> device_ = nullptr;
 	//DXGIファクトリ
 	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory_ = nullptr;
-	//デバッグレイヤー
-	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController_ = nullptr;
 	//使用するアダプタ用の変数
 	Microsoft::WRL::ComPtr<IDXGIAdapter4> useAdapter_ = nullptr;
 
