@@ -29,6 +29,7 @@
 
 #include "Input.h"
 #include "WinApp.h"
+#include "DirectXCommon.h"
 
 
 //ImGui
@@ -259,16 +260,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	///デバッグレイヤー
 	///===================================================================
 
-#ifdef _DEBUG
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController = nullptr;
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
-		//デバッグレイヤーを有効化する
-		debugController->EnableDebugLayer();
-		//さらにGPU側でもチェックを行うようにする
-		debugController->SetEnableGPUBasedValidation(TRUE);
-	}
-#endif
 
+
+	DirectXCommon* dxCommon = nullptr;
+
+	//DirectXの初期化
+	dxCommon = new DirectXCommon();
+	dxCommon->Initialize(winApp);
 
 	//DXGIファクトリーの生成
 	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
@@ -1440,10 +1439,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	CloseHandle(fenceEvent);
 
 	delete input;
-
 	winApp->Finalize();
 	delete winApp;
-
+	delete dxCommon;
 
 
 #ifdef _DEBUG
