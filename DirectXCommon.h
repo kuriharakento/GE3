@@ -125,6 +125,16 @@ public:	//メンバ関数
 	/// \return 
 	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
 
+	/*--------------[ ゲッター ]-----------------*/
+
+	/// \brief デバイスの取得
+	/// \return 
+	ID3D12Device* GetDevice() const { return device_.Get(); }
+
+	/// \brief コマンドリストの取得
+	/// \return 
+	ID3D12GraphicsCommandList* GetCommandList() const { return commandList_.Get(); }
+
 private:
 	//FPS固定初期化
 	void InitializeFixFPS();
@@ -203,9 +213,9 @@ private:	//メンバ変数
 
 	/*--------------[ DXCコンパイラの変数 ]-----------------*/
 
-	IDxcUtils* dxcUtils_ = nullptr;
-	IDxcCompiler3* dxcCompiler_ = nullptr;
-	IDxcIncludeHandler* includeHandler_ = nullptr;
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_ = nullptr;
+	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_ = nullptr;
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_ = nullptr;
 
 	/*--------------[ 描画後処理の変数 ]-----------------*/
 

@@ -1367,8 +1367,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		commandList->RSSetViewports(1, &viewport);
 		commandList->RSSetScissorRects(1, &scissorRect);
 		//RootSignatureを設定。PSOに設定しているけど別途設定が必要
+
+		//スプライトの描画準備
+		spriteCommon->CommonRenderingsettings();
+
 		commandList->SetGraphicsRootSignature(rootSignature.Get());
 		commandList->SetPipelineState(graphicsPipelineState.Get());
+
 
 
 		commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
