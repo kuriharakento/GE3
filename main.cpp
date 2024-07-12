@@ -31,11 +31,9 @@
 #include "Input.h"
 #include "WinApp.h"
 #include "DirectXCommon.h"
-#include "SpriteCommon.h"
-#include "Sprite.h"
+
 
 //ImGui
-
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
@@ -253,22 +251,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	///
 	///===================================================================
 
-	std::unique_ptr<WinApp> winApp = nullptr;
+	WinApp* winApp = nullptr;
 
 	//WindowsAPIの初期化
-	winApp = std::make_unique<WinApp>();
+	winApp = new WinApp();
 	winApp->Initialize();
 
 
-	std::unique_ptr<DirectXCommon> dxCommon = nullptr;
+	DirectXCommon* dxCommon = nullptr;
 
 	//DirectXの初期化
-	dxCommon = std::make_unique<DirectXCommon>();
+	dxCommon = new DirectXCommon();
 	//dxCommon->Initialize(winApp);
-
-	std::unique_ptr<SpriteCommon> spriteCommon = nullptr;
-	spriteCommon = std::make_unique<SpriteCommon>();
-	spriteCommon->Initialize();
 
 	///===================================================================
 	///デバッグレイヤー
@@ -1175,12 +1169,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	bool useMonsterBall = true;
 
 	//入力
-	std::unique_ptr<Input> input = nullptr;
-	input = std::make_unique<Input>();
-	input->Initialize(winApp.get());
+	Input* input = nullptr;
+	input = new Input();
+	input->Initialize(winApp);
 
-	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-	sprite->Initialize();
 
 	///===================================================================
 	///
@@ -1462,7 +1454,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	//CloseHandle(fenceEvent);
 
+	delete input;
 	winApp->Finalize();
+	delete winApp;
+	delete dxCommon;
 
 
 #ifdef _DEBUG
