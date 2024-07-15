@@ -27,6 +27,8 @@
 #include <dxcapi.h>
 #pragma comment(lib,"dxcompiler.lib")
 
+#include "Vector.h"
+#include "Matrix.h"
 
 #include "Input.h"
 #include "WinApp.h"
@@ -40,63 +42,6 @@
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
 extern  IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-struct Vector2
-{
-	float x;
-	float y;
-};
-struct Vector3
-{
-	float x;
-	float y;
-	float z;
-};
-struct Vector4
-{
-	float x;
-	float y;
-	float z;
-	float w;
-};
-
-struct Matrix3x3
-{
-	float m[3][3];
-};
-
-struct Matrix4x4
-{
-	float m[4][4];
-};
-
-struct TransformationMatrix
-{
-	Matrix4x4 WVP;
-	Matrix4x4 World;
-};
-
-struct Transform
-{
-	Vector3 scale;
-	Vector3 rotate;
-	Vector3 translate;
-};
-
-struct VertexData
-{
-	Vector4 position;
-	Vector2 texcoord;
-	Vector3 normal;
-};
-
-struct Material
-{
-	Vector4 color;
-	int32_t enableLighting;
-	float padding[3];
-	Matrix4x4 uvTransform;
-};
 
 struct DirectionalLight
 {
@@ -196,7 +141,6 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 
 Matrix4x4 Inverse(const Matrix4x4& m);
 
-float cot(float a) { return cos(a) / sin(a); }
 //正規化
 Vector3 Normalize(const Vector3& v);
 
@@ -268,7 +212,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	std::unique_ptr<SpriteCommon> spriteCommon = nullptr;
 	spriteCommon = std::make_unique<SpriteCommon>();
-	spriteCommon->Initialize();
+	spriteCommon->Initialize(dxCommon.get());
 
 	///===================================================================
 	///デバッグレイヤー
@@ -1180,7 +1124,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	input->Initialize(winApp.get());
 
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-	sprite->Initialize();
+	sprite->Initialize(spriteCommon.get());
 
 	///===================================================================
 	///
@@ -1369,7 +1313,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//RootSignatureを設定。PSOに設定しているけど別途設定が必要
 
 		//スプライトの描画準備
-		spriteCommon->CommonRenderingsettings();
+		//spriteCommon->CommonRenderingsettings();
 
 		commandList->SetGraphicsRootSignature(rootSignature.Get());
 		commandList->SetPipelineState(graphicsPipelineState.Get());
