@@ -56,13 +56,29 @@ void Sprite::Initialize(SpriteCommon* spriteCommon)
 
 void Sprite::Update()
 {
-	Transform transformSprite{
+	/*--------------[ Transform情報を作る ]-----------------*/
+
+	Transform transform{
 		{1.0f,1.0f,1.0f},
 		{0.0f,0.0f,0.0f},
 		{0.0f,0.0f,0.0f}
 	};
 
-	Matrix4x4 worldMatrix = MatrixUtils::MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+	/*--------------[ 頂点リソースにデータ書き込む ]-----------------*/
+
+	//左下
+	vertexData_[0].position = { 0.0f,1.0f,0.0f,1.0f };
+	vertexData_[0].texcoord = { 0.0f,1.0f };
+	vertexData_[0].normal = { 0.0f,0.0f,-1.0f };
+	//左上
+
+
+	transform.translate = { position_.x,position_.y,0.0f };
+	transform.rotate = { 0.0f,0.0f,rotation_ };
+
+
+
+	Matrix4x4 worldMatrix = MatrixUtils::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 	Matrix4x4 viewMatrix = MatrixUtils::MakeIdentity4x4();
 	Matrix4x4 projectionMatrix = MatrixUtils::MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
 	

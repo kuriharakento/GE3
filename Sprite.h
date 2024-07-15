@@ -48,6 +48,44 @@ public:
 	/// \brief 描画
 	void Draw();
 
+	/*--------------[ ゲッター ]-----------------*/
+
+	/// \brief 座標の取得
+	/// \return 座標
+	const Vector2& GetPosition()const { return position_; }
+
+	/// \brief 回転の取得
+	/// \return 回転
+	float GetRotation()const { return rotation_; }
+
+	/// \brief 色の取得
+	/// \return 色
+	const Vector4& GetColor()const { return materialData_->color; }
+
+	/// \brief サイズの取得
+	/// \return 
+	const Vector2& GetSize()const { return  size_; }
+
+	/*--------------[ セッター ]-----------------*/
+
+	/// \brief 座標をセットする
+	/// \param position 
+	void SetPosition(const Vector2& position) { position_ = position; }
+
+	/// \brief 回転をセットする
+	/// \param rotation 
+	void SetRotation(float rotation) { rotation_ = rotation; }
+
+	/// \brief 色をセットする
+	/// \param color 
+	void SetColor(const Vector4& color) { materialData_->color = color; }
+
+	/// \brief サイズをセットする
+	/// \param size 
+	void SetSize(const Vector2& size) { size_ = size; }
+
+private:
+
 	/// \brief バッファリソースの生成
 	/// \param device 
 	/// \param sizeInBytes 
@@ -83,7 +121,16 @@ private:
 	//バッファリソース内のデータを指すポインタ
 	TransformationMatrix* transformationMatrixData_ = nullptr;
 
+	/*--------------[ Transform情報 ]-----------------*/
 
+	//座標
+	Vector2 position_ = { 0.0f,0.0f };
+	//回転
+	float rotation_ = 0.0f;
+	//カラー
+
+	//サイズ
+	Vector2 size_ = { 640.0f,360.0f };
 
 };
 
