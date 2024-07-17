@@ -71,10 +71,22 @@ void Sprite::Update()
 	vertexData_[0].texcoord = { 0.0f,1.0f };
 	vertexData_[0].normal = { 0.0f,0.0f,-1.0f };
 	//左上
+	vertexData_[1].position = { 0.0f,0.0f,0.0f,1.0f };
+	vertexData_[1].texcoord = { 0.0f,1.0f };
+	vertexData_[1].normal = { 0.0f,0.0f,-1.0f };
+	//右下
+	vertexData_[2].position = { 1.0f,1.0f,0.0f,1.0f };
+	vertexData_[2].texcoord = { 1.0f,1.0f };
+	vertexData_[2].normal = { 0.0f,0.0f,-1.0f };
+	//右上
+	vertexData_[3].position = { 1.0f,0.0f,0.0f,1.0f };
+	vertexData_[3].texcoord = { 1.0f,0.0f };
+	vertexData_[3].normal = { 0.0f,0.0f,-1.0f };
 
-
-	transform.translate = { position_.x,position_.y,0.0f };
+	transform.scale = { size_.x,size_.y,1.0f };
 	transform.rotate = { 0.0f,0.0f,rotation_ };
+	transform.translate = { position_.x,position_.y,0.0f };
+	
 
 
 
@@ -114,7 +126,7 @@ void Sprite::Draw()
 	spriteCommon_->GetDxCommon()->GetCommandList()->DrawInstanced(6, 1, 0, 0);
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)
+Microsoft::WRL::ComPtr<ID3D12Resource> Sprite::CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeInBytes)
 {
 	Microsoft::WRL::ComPtr<ID3D12Resource> bufferResource = nullptr;
 	//頂点リソース用のヒープ設定

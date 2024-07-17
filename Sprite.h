@@ -84,8 +84,6 @@ public:
 	/// \param size 
 	void SetSize(const Vector2& size) { size_ = size; }
 
-private:
-
 	/// \brief バッファリソースの生成
 	/// \param device 
 	/// \param sizeInBytes 

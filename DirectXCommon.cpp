@@ -312,6 +312,7 @@ void DirectXCommon::InitializeRenderTargetView()
 		// 次のRTVのためにディスクリプタハンドルを移動
 		rtvStartHandle.ptr += device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
+		assert(swapChainResources_[i].Get());
 	}
 }
 
@@ -524,7 +525,7 @@ void DirectXCommon::PostDraw()
 
 	/*--------------[ GPUコマンドの実行 ]-----------------*/
 
-	//GPU二コマンドリストの実行を行わせる
+	//GPUにコマンドリストの実行を行わせる
 	Microsoft::WRL::ComPtr<ID3D12CommandList> commandLists[] = { commandList_ };
 	commandQueue_->ExecuteCommandLists(1, commandLists->GetAddressOf());
 
@@ -543,9 +544,9 @@ void DirectXCommon::PostDraw()
 	commandQueue_->Signal(fence_.Get(), fenceValue_);
 	//Fenceの値が指定したSignal値にたどり着いているか確認する
 	//GetCompleteValueの初期値はFence制作時に渡した初期値
+	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (fence_->GetCompletedValue() < fenceValue_)
 	{
-		HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 		//指定したSignalにたどり着いていないので、たどり着くまで待つようにイベントを設定する
 		fence_->SetEventOnCompletion(fenceValue_, fenceEvent);
 		//イベントを待つ
@@ -645,7 +646,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> DirectXCommon::CompileSharder(const std::wstrin
 		&shaderSourceBuffer,
 		arguments,
 		_countof(arguments),
-		includeHandler_,
+		includeHandler_.Get(),
 		IID_PPV_ARGS(&shaderResult)
 	);
 	//コンパイルエラーではなくdxcで起動できないなど致命的な状況

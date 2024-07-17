@@ -1,9 +1,8 @@
 #include "WinApp.h"
-#pragma comment(lib,"winm.lib")
+#pragma comment(lib,"winmm.lib")
 
 #include "externals/imgui/imgui.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
-
 
 LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -26,7 +25,6 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 
 }
-
 
 void WinApp::Initialize()
 {
@@ -92,5 +90,3 @@ bool WinApp::ProcessMessage()
 
 	return false;
 }
-
-

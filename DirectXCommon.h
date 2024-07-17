@@ -151,43 +151,43 @@ private:	//メンバ変数
 	/*--------------[ デバイスの変数 ]-----------------*/
 
 	//DirectX12デバイス
-	Microsoft::WRL::ComPtr<ID3D12Device> device_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Device> device_;
 	//DXGIファクトリ
-	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory_ = nullptr;
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory_;
 	//使用するアダプタ用の変数
-	Microsoft::WRL::ComPtr<IDXGIAdapter4> useAdapter_ = nullptr;
+	Microsoft::WRL::ComPtr<IDXGIAdapter4> useAdapter_;
 
 	/*--------------[ コマンドの変数 ]-----------------*/
 
-	Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue_;
 	//コマンドアロケータ
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator_;
 	//コマンドリスト
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList_;
 	//コマンドキュー
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue_;
 
 	/*--------------[ スワップチェインの変数 ]-----------------*/
 
 	//スワップチェイン
-	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_ = nullptr;
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapChain_;
 	//スワップチェインリソース
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
 
 	/*--------------[ 深度バッファの変数 ]-----------------*/
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
 
 	/*--------------[ ディスクリプタヒープの変数 ]-----------------*/
 
 	//RTV用のヒープでディスクリプタの数は２。RTVはShader内で触るものではないので、ShaderVisibleはfalse
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvDescriptorHeap_;
 
 	//SRV用のヒープでディスクリプタの数は１２８。SRVはShader内で触るものなので、ShaderVisibleはtrue
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
 
 	//DSV用のヒープでディスクリプタの数は１。DSVはSharder内で触るものではないので、ShaderVisibleはfalse
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap_;
 
 	//ディスクリプタヒープのサイズ
 	uint32_t descriptorSizeSRV_;
@@ -196,12 +196,12 @@ private:	//メンバ変数
 
 	/*--------------[ レンダーターゲットビューの変数 ]-----------------*/
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources_[2] = { nullptr };
+	Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResources_[2];
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles_[2]{};
 
 	/*--------------[ フェンスの変数 ]-----------------*/
 
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence_ = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
 
 	/*--------------[ ビューポートの変数 ]-----------------*/
 
@@ -213,9 +213,9 @@ private:	//メンバ変数
 
 	/*--------------[ DXCコンパイラの変数 ]-----------------*/
 
-	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_ = nullptr;
-	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_ = nullptr;
-	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_ = nullptr;
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;
+	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
 
 	/*--------------[ 描画後処理の変数 ]-----------------*/
 
