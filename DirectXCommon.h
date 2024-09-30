@@ -143,6 +143,10 @@ private:
 	//記録時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
 
+public:
+	/*--------------[ 最大テクスチャ枚数 ]-----------------*/
+
+	static const uint32_t kMaxSRVCount;
 
 private:	//メンバ変数
 
@@ -220,6 +224,8 @@ private:	//メンバ変数
 	/*--------------[ 描画後処理の変数 ]-----------------*/
 
 	UINT64 fenceValue_ = 0;
+
+	
 
 };
 

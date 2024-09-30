@@ -38,6 +38,7 @@
 
 //ImGui
 
+#include "TextureManager.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
@@ -1131,6 +1132,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	std::unique_ptr<Input> input = std::make_unique<Input>();
 	input->Initialize(winApp.get());
 
+	//テクスチャマネージャー
+	TextureManager::GetInstance()->Initialize(dxCommon.get());
+
 	//スプライトコマンド
 	std::unique_ptr<SpriteCommon> spriteCommon = std::make_unique<SpriteCommon>();
 	spriteCommon->Initialize(dxCommon.get());
@@ -1428,7 +1432,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//CloseHandle(fenceEvent);
 
 		winApp->Finalize();
-
+		TextureManager::GetInstance()->Finalize();
 
 #ifdef _DEBUG
 
