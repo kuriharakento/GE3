@@ -5,7 +5,6 @@
 
 TextureManager* TextureManager::instance_ = nullptr;
 
-
 TextureManager* TextureManager::GetInstance()
 {
 	if(instance_ == nullptr)

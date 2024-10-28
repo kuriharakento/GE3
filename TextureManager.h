@@ -13,10 +13,11 @@ class TextureManager
 public:
 	//シングルトンインスタンスの取得
 	static TextureManager* GetInstance();
-	/// \brief 初期化
-	void Initialize(DirectXCommon* dxCommon);
 	/// \brief 終了
 	void Finalize();
+
+	/// \brief 初期化
+	void Initialize(DirectXCommon* dxCommon);
 
 	/// \brief テクスチャファイルの読み込み
 	/// \param filePath 
